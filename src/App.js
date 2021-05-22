@@ -23,3 +23,15 @@ function App() {
 }
 
 export default App;
+
+// TODO: Create Base layout 
+// TODO: User Standard cal/time picker
+// TODO: Show current Day progress
+// TODO: Table for week inputs
+// TODO: calculate week totals 
+// TODO: use localstorage
+// TODO: add popup for localstorage cookie Law
+// TODO: About Page 
+// TODO: About Page Content 
+// TODO: Time Picker 5 minutes jumps
+// TODO: scroll Day Picker
