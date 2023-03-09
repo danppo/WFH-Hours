@@ -1,9 +1,8 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import dayjs from 'dayjs';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import makeStyles from '@mui/styles/makeStyles';
+import Time from '../../components/Time/Time';
 
 const useStyles = makeStyles((theme) => ({
   buttonContent: {
@@ -16,17 +15,16 @@ const Welcome = ({
 }) => {
   // console.log(theme);
   const classes = useStyles();
-  const [buttonContent, setButtonContent] = React.useState('Start Working Now');
 
-  const time = dayjs().format('dddd D MMM YYYY, H:mm');
+
 
   return (
-    <Grid container p={1} direction={'row'} alignItems={'center'} justify={'space-evenly'} >
+    <Grid container p={1} direction={'row'} alignItems={'center'} justifyContent={'space-evenly'} >
       <Typography variant="body1">
         Good Morning {name}
       </Typography>
-      <Typography variant="body2">
-        {time}
+      <Typography variant="body1">
+        <Time />
       </Typography>
     </Grid>
   );

@@ -1,11 +1,11 @@
-import React from 'react';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
+import React, {useState} from 'react';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import makeStyles from '@mui/styles/makeStyles';
 import Report from '../sections/Report/Report';
 import Welcome from '../sections/Welcome/Welcome';
+import { ButtonGroup } from '@mui/material';
 
 const useStyles = makeStyles((theme) => ({
   buttonContent: {
@@ -18,39 +18,48 @@ const useStyles = makeStyles((theme) => ({
 
 const Main = () => {
   const classes = useStyles();
-  const [buttonContent, setButtonContent] = React.useState('Start Working Now');
-  const [buttonBreak, setButtonBreak] = React.useState('Start screen rest');
-  const [buttonLunch, setButtonLunch] = React.useState('Start break');
+
+  const dayState = {
+    NOTSTARTED: "not started",
+    STARTED: "started",
+    FINISHED: "finished"
+  }
+
+  const [dayStarted, setDayStarted] = useState(dayState.NOTSTARTED);
+  const [dayPaused, setDayPaused] = useState(false);
 
   return (
     <Box p={1} >
       <Welcome name='Daniel' />
-      <Button variant="contained" fullWidth color='primary' size='large' >
-        <Box m={1.4}>
-          <Typography variant="button" color='accent' className={classes.buttonContent}>
-            {buttonContent}
-          </Typography>
-        </Box>
-      </Button>
+      {dayStarted === dayState.STARTED ?
+        <ButtonGroup fullWidth >
+          <Button variant="contained"  color='primary' size='large' onClick={() => setDayStarted(dayState.FINISHED)} >
+            <Box m={1.4}>
+              <Typography variant="button"  className={classes.buttonContent}>
+                End Day
+              </Typography>
+            </Box>
+          </Button>
+          <Button variant="contained"  color='secondary' size='large' onClick={() => setDayPaused(!dayPaused)}>
+            <Box m={1.4}>
+              <Typography variant="button"  className={classes.buttonContent}>
+                {dayPaused ? "Return to work" : "have a break"}
+              </Typography>
+            </Box>
+          </Button>
+        </ButtonGroup>
+      :
+        <Button variant="contained" fullWidth color='primary' size='large' onClick={() => setDayStarted(dayState.STARTED)} >
+          <Box m={1.4}>
+            <Typography variant="button"  className={classes.buttonContent}>
+              {dayStarted === dayState.NOTSTARTED ? "Start your day" : "Restart work"}
+            </Typography>
+          </Box>
+        </Button>
+      }
       <Typography variant="h6" gutterBottom>
         Status: Working 3:25
       </Typography>
-      <Grid container p={1} direction={'row'} alignItems={'center'} justify={'space-evenly'} >
-        <Button variant="contained"  color='secondary' size='large' >
-          <Box m={1.4}>
-            <Typography variant="button" className={classes.buttonBeaks}>
-              {buttonBreak}
-            </Typography>
-          </Box>
-        </Button>
-        <Button variant="contained"  color='primary' size='large' >
-          <Box m={1.4}>
-            <Typography variant="button" className={classes.buttonBeaks}>
-              {buttonLunch}
-            </Typography>
-          </Box>
-        </Button>
-      </Grid>
       <Report />
     </Box>
   );
