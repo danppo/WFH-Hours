@@ -8,44 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 // import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-
-const columns = [
-  { id: 'day', label: 'Day'},
-  { id: 'hours', label: 'Hours'},
-  {
-    id: 'compare',
-    label: '',
-    align: 'right'
-  },
-];
-
-const rows = [
-  {
-    day: 'Monday',
-    hours: '7:30',
-    compare: '0'
-  },
-  {
-    day: 'Tuesday',
-    hours: '7:30',
-    compare: '0'
-  },
-  {
-    day: 'Wednesday',
-    hours: '7:30',
-    compare: '0'
-  },
-  {
-    day: 'Thursday',
-    hours: '7:30',
-    compare: '0'
-  },
-  {
-    day: 'Friday',
-    hours: '7:30',
-    compare: '0'
-  },
-];
+import decimalToHours from '../../functions/decimalToHours';
 
 const useStyles = makeStyles({
   root: {
@@ -56,7 +19,7 @@ const useStyles = makeStyles({
   },
 });
 
-const Report = () => {
+const Report = ({ details }) => {
   const classes = useStyles();
   // eslint-disable-next-line no-unused-vars
   const [page, setPage] = React.useState(0);
@@ -74,50 +37,33 @@ const Report = () => {
 
   return (
     <Paper className={classes.root}>
-      <TableContainer className={classes.container}>
-        <Table size="small" stickyHeader aria-label="sticky table">
+      <TableContainer component={Paper}>
+        <Table size='small' aria-label='simple table'>
           <TableHead>
             <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
+              <TableCell>Day</TableCell>
+              <TableCell align='right'>Hours</TableCell>
+              <TableCell align='right'>Remaining</TableCell>
             </TableRow>
           </TableHead>
-          {/* <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell key={column.id} align={column.align}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-          </TableBody> */}
+          <TableBody>
+            {details.map((details) => (
+              <TableRow
+                key={details.day}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                <TableCell component='th' scope='row'>
+                  {details.dayName}
+                </TableCell>
+                <TableCell align='right'>{decimalToHours(details.hoursDone)}</TableCell>
+                <TableCell align='right'>{decimalToHours(details.hoursRemaining)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </TableContainer>
-      {/* <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      /> */}
     </Paper>
   );
-}
+};
 
 export default Report;

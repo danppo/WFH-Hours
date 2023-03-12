@@ -1,5 +1,5 @@
 import './App.css';
-import { ThemeProvider, StyledEngineProvider, adaptV4Theme } from '@mui/material/styles';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material/styles';
 import palette from './theme/theme';
 import Container from '@mui/material/Container';
@@ -10,7 +10,6 @@ import Paper from '@mui/material/Paper';
 import { useState } from 'react';
 
 function App() {
-
   const theme = createTheme(palette);
 
   const hasData = localStorage.getItem('WFHHOURS');
@@ -19,19 +18,15 @@ function App() {
 
   const [showMain, setMainSetup] = useState(!!hasData);
 
-
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <Container  component="main" maxWidth="sm">
-        <Paper>
-          <Header />
-          <Main />
-          {!showMain &&
-            
-            <Setup setShowMain={setMainSetup} />
-          }
-          {/* <div className="App">
+        <Container component='main' maxWidth='sm'>
+          <Paper>
+            <Header />
+            {showMain && <Main />}
+            {!showMain && <Setup setShowMain={setMainSetup} />}
+            {/* <div className="App">
             <header className="App-header">
               <img src={logo} className="App-logo" alt="logo" />
               <p>
@@ -47,7 +42,7 @@ function App() {
               </a>
             </header>
           </div> */}
-            </Paper>
+          </Paper>
         </Container>
       </ThemeProvider>
     </StyledEngineProvider>
@@ -56,7 +51,6 @@ function App() {
 
 export default App;
 
-// TODO: Create Base layout
 // TODO: User Standard cal/time picker
 // TODO: Show current Day progress
 // TODO: Table for week inputs
