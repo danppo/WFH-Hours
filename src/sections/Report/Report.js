@@ -8,7 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 // import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import decimalToHours from '../../functions/decimalToHours';
+import minutesToHours from '../../functions/minutesToHours';
 
 const useStyles = makeStyles({
   root: {
@@ -55,8 +55,8 @@ const Report = ({ details }) => {
                 <TableCell component='th' scope='row'>
                   {details.dayName}
                 </TableCell>
-                <TableCell align='right'>{decimalToHours(details.hoursDone)}</TableCell>
-                <TableCell align='right'>{decimalToHours(details.hoursRemaining)}</TableCell>
+                <TableCell align='right'>{minutesToHours(details.hoursDone)}</TableCell>
+                <TableCell align='right'>{minutesToHours(details.hoursRemaining)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

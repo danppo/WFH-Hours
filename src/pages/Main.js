@@ -8,6 +8,9 @@ import Welcome from '../sections/Welcome/Welcome';
 import { ButtonGroup } from '@mui/material';
 import dayjs from 'dayjs';
 
+var duration = require('dayjs/plugin/duration')
+dayjs.extend(duration)
+
 const useStyles = makeStyles((theme) => ({
   buttonContent: {
     fontSize: '1.3rem',
@@ -20,26 +23,24 @@ const useStyles = makeStyles((theme) => ({
 const Main = () => {
   const classes = useStyles();
 
-  const timeCalc = (time) => {
-    const hours = Math.floor(time);
-    const minutes = (time - hours) * 60;
-    console.log(hours + '.' + minutes);
-  };
-  timeCalc(7.5);
+  window.onstorage = () => {
+    console.log('changes');
+  }
 
   const dayState = {
     NOTSTARTED: 'not started',
     STARTED: 'started',
+    PAUSED: 'paused',
     FINISHED: 'finished',
   };
 
   const data = JSON.parse(localStorage.getItem('WFHHOURS'));
   const thisWeek = dayjs().startOf('week').format('YYYYMMDD');
+  const dayNo = dayjs().day();
+  const [daysData, setDaysData] = useState(data.hours[thisWeek]);
 
-  if (data.hours[thisWeek]) {
-    console.log('we have data');
-  } else {
-    const dailyHours = data.weeklyHours / 5;
+  if (!daysData) {
+    const dailyHours = (data.weeklyHours * 60) / 5;
     console.log(dailyHours);
     console.log('nothing here');
     console.log(dayjs().day());
@@ -53,62 +54,121 @@ const Main = () => {
           dayName: 'Sunday',
           hoursDone: 0,
           hoursRemaining: 0,
+          state: dayState.NOTSTARTED,
+          time: 0,
         },
         {
           day: 1,
           dayName: 'Monday',
           hoursDone: 0,
           hoursRemaining: dailyHours,
+          state: dayState.NOTSTARTED,
+          time: 0,
         },
         {
           day: 2,
           dayName: 'Tuesday',
           hoursDone: 0,
           hoursRemaining: dailyHours,
+          state: dayState.NOTSTARTED,
+          time: 0,
         },
         {
           day: 3,
           dayName: 'Wednesday',
           hoursDone: 0,
           hoursRemaining: dailyHours,
+          state: dayState.NOTSTARTED,
+          time: 0,
         },
         {
           day: 4,
           dayName: 'Thursday',
           hoursDone: 0,
           hoursRemaining: dailyHours,
+          state: dayState.NOTSTARTED,
+          time: 0,
         },
         {
           day: 5,
           dayName: 'Friday',
           hoursDone: 0,
           hoursRemaining: dailyHours,
+          state: dayState.NOTSTARTED,
+          time: 0,
         },
         {
           day: 6,
           dayName: 'Saturday',
           hoursDone: 0,
           hoursRemaining: 0,
+          state: dayState.NOTSTARTED,
+          time: 0,
         },
       ],
     };
     localStorage.setItem('WFHHOURS', JSON.stringify(newData));
+    console.log(newData);
+    setDaysData(newData.hours[thisWeek]);
   }
 
-  const [dayStarted, setDayStarted] = useState(dayState.NOTSTARTED);
+
+  const today = () => (daysData ? daysData.days[dayNo] : -1);
+  console.log(daysData);
+  console.log(today());
+
+  // const [dayStarted, setDayStarted] = useState(dayState.NOTSTARTED);
   const [dayPaused, setDayPaused] = useState(false);
 
-  console.log(data.hours.days);
+  const handleStateChange = (type) => {
+    const tempData = data;
+    const now = dayjs();
+    if (today().time === 0) {
+      tempData.hours[thisWeek].days[dayNo].time = now;
+
+    } else {
+      const start = dayjs(today().time);
+      // const now = dayjs();
+      console.log(start.diff(now, 'minute'));
+      console.log(now.diff(today().time, 'minute'));
+      tempData.hours[thisWeek].days[dayNo].hoursDone = now.diff(today().time, 'minute');
+
+      // console.log(dayjs.duration(today().time).diff(now));
+    }
+    console.log(today().time);
+    console.log(type);
+    console.log(dayState.STARTED);
+    if (type === dayState.STARTED) {
+
+      console.log(dayjs());
+      tempData.hours[thisWeek].days[dayNo].time = now;
+      tempData.hours[thisWeek].days[dayNo].state = type;
+      localStorage.setItem('WFHHOURS', JSON.stringify(tempData));
+      setDaysData(tempData.hours[thisWeek]);
+    } else if (type === dayState.FINISHED) {
+      tempData.hours[thisWeek].days[dayNo].time = now;
+      tempData.hours[thisWeek].days[dayNo].state = type;
+      localStorage.setItem('WFHHOURS', JSON.stringify(tempData));
+      setDaysData(tempData.hours[thisWeek]);
+    }
+
+  }
+
+  console.log(dayState.STARTED);
+  console.log(today().state);
+  console.log(today().state === dayState.STARTED);
+
+
   return (
     <Box p={1}>
       <Welcome name={data.name} />
-      {dayStarted === dayState.STARTED ? (
+      {today().state === dayState.STARTED ? (
         <ButtonGroup fullWidth>
           <Button
             variant='contained'
             color='primary'
             size='large'
-            onClick={() => setDayStarted(dayState.FINISHED)}
+            onClick={() => handleStateChange(dayState.FINISHED)}
           >
             <Box m={1.4}>
               <Typography variant='button' className={classes.buttonContent}>
@@ -124,7 +184,7 @@ const Main = () => {
           >
             <Box m={1.4}>
               <Typography variant='button' className={classes.buttonContent}>
-                {dayPaused ? 'Return to work' : 'have a break'}
+                {today().state === dayState.PAUSED ? 'Return to work' : 'have a break'}
               </Typography>
             </Box>
           </Button>
@@ -135,11 +195,11 @@ const Main = () => {
           fullWidth
           color='primary'
           size='large'
-          onClick={() => setDayStarted(dayState.STARTED)}
+          onClick={() => handleStateChange(dayState.STARTED)}
         >
           <Box m={1.4}>
             <Typography variant='button' className={classes.buttonContent}>
-              {dayStarted === dayState.NOTSTARTED ? 'Start your day' : 'Restart work'}
+              {today().state === dayState.NOTSTARTED ? 'Start your day' : 'Restart work'}
             </Typography>
           </Box>
         </Button>
