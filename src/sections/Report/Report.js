@@ -9,17 +9,21 @@ import TableHead from '@mui/material/TableHead';
 // import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import minutesToHours from '../../functions/minutesToHours';
+import classNames from 'classnames';
+import palette from '../../theme/theme';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
   },
   container: {
     maxHeight: 440,
   },
-});
+  currentRow: {
+    backgroundColor: palette.palette.primary.light }
+}));
 
-const Report = ({ details }) => {
+const Report = ({ details, dayNo }) => {
   const classes = useStyles();
   // eslint-disable-next-line no-unused-vars
   const [page, setPage] = React.useState(0);
@@ -43,7 +47,7 @@ const Report = ({ details }) => {
             <TableRow>
               <TableCell>Day</TableCell>
               <TableCell align='right'>Hours</TableCell>
-              <TableCell align='right'>Remaining</TableCell>
+              <TableCell align='right'>Target Hours</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -51,12 +55,13 @@ const Report = ({ details }) => {
               <TableRow
                 key={details.day}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                className={classNames({[classes.currentRow]: details.day === dayNo})}
               >
                 <TableCell component='th' scope='row'>
                   {details.dayName}
                 </TableCell>
                 <TableCell align='right'>{minutesToHours(details.hoursDone)}</TableCell>
-                <TableCell align='right'>{minutesToHours(details.hoursRemaining)}</TableCell>
+                <TableCell align='right'>{minutesToHours(details.dailyMinutes - details.hoursDone)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

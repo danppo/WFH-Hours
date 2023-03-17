@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -7,6 +7,8 @@ import Report from '../sections/Report/Report';
 import Welcome from '../sections/Welcome/Welcome';
 import { ButtonGroup } from '@mui/material';
 import dayjs from 'dayjs';
+import generateNewWeek from "../functions/generateNewWeek"
+import DailyMinutes from '../components/DailyMinutes/DailyMinutes';
 
 var duration = require('dayjs/plugin/duration')
 dayjs.extend(duration)
@@ -20,149 +22,72 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export const dayState = {
+  NOTSTARTED: 'not started',
+  STARTED: 'started',
+  PAUSED: 'paused',
+  FINISHED: 'finished',
+};
+
 const Main = () => {
   const classes = useStyles();
 
-  window.onstorage = () => {
-    console.log('changes');
-  }
 
-  const dayState = {
-    NOTSTARTED: 'not started',
-    STARTED: 'started',
-    PAUSED: 'paused',
-    FINISHED: 'finished',
-  };
-
-  const data = JSON.parse(localStorage.getItem('WFHHOURS'));
+  const [data, setData] = useState(JSON.parse(localStorage.getItem('WFHHOURS')));
   const thisWeek = dayjs().startOf('week').format('YYYYMMDD');
   const dayNo = dayjs().day();
-  const [daysData, setDaysData] = useState(data.hours[thisWeek]);
+  
+  const today = () => (data.hours[thisWeek] ? data.hours[thisWeek].days[dayNo] : -1);
+  const [currentState, setCurrentState] = useState(dayState.NOTSTARTED);
 
-  if (!daysData) {
-    const dailyHours = (data.weeklyHours * 60) / 5;
-    console.log(dailyHours);
-    console.log('nothing here');
-    console.log(dayjs().day());
+  if (!data.hours[thisWeek]) {
     const newData = data;
-    // TODO: auto generate array
-    newData.hours[thisWeek] = {
-      completed: 0,
-      days: [
-        {
-          day: 0,
-          dayName: 'Sunday',
-          hoursDone: 0,
-          hoursRemaining: 0,
-          state: dayState.NOTSTARTED,
-          time: 0,
-        },
-        {
-          day: 1,
-          dayName: 'Monday',
-          hoursDone: 0,
-          hoursRemaining: dailyHours,
-          state: dayState.NOTSTARTED,
-          time: 0,
-        },
-        {
-          day: 2,
-          dayName: 'Tuesday',
-          hoursDone: 0,
-          hoursRemaining: dailyHours,
-          state: dayState.NOTSTARTED,
-          time: 0,
-        },
-        {
-          day: 3,
-          dayName: 'Wednesday',
-          hoursDone: 0,
-          hoursRemaining: dailyHours,
-          state: dayState.NOTSTARTED,
-          time: 0,
-        },
-        {
-          day: 4,
-          dayName: 'Thursday',
-          hoursDone: 0,
-          hoursRemaining: dailyHours,
-          state: dayState.NOTSTARTED,
-          time: 0,
-        },
-        {
-          day: 5,
-          dayName: 'Friday',
-          hoursDone: 0,
-          hoursRemaining: dailyHours,
-          state: dayState.NOTSTARTED,
-          time: 0,
-        },
-        {
-          day: 6,
-          dayName: 'Saturday',
-          hoursDone: 0,
-          hoursRemaining: 0,
-          state: dayState.NOTSTARTED,
-          time: 0,
-        },
-      ],
-    };
+    newData.hours[thisWeek] = generateNewWeek(data.weeklyHours);
+    
     localStorage.setItem('WFHHOURS', JSON.stringify(newData));
-    console.log(newData);
-    setDaysData(newData.hours[thisWeek]);
+    setData(newData);
+    // setCurrentState(dayState.NOTSTARTED);
   }
 
-
-  const today = () => (daysData ? daysData.days[dayNo] : -1);
-  console.log(daysData);
-  console.log(today());
-
-  // const [dayStarted, setDayStarted] = useState(dayState.NOTSTARTED);
-  const [dayPaused, setDayPaused] = useState(false);
+  useEffect(()=> {
+    setCurrentState(today().state)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
+  
 
   const handleStateChange = (type) => {
     const tempData = data;
     const now = dayjs();
+
     if (today().time === 0) {
       tempData.hours[thisWeek].days[dayNo].time = now;
-
     } else {
-      const start = dayjs(today().time);
-      // const now = dayjs();
-      console.log(start.diff(now, 'minute'));
-      console.log(now.diff(today().time, 'minute'));
-      tempData.hours[thisWeek].days[dayNo].hoursDone = now.diff(today().time, 'minute');
-
-      // console.log(dayjs.duration(today().time).diff(now));
+      const justWorked = now.diff(today().time, 'minute');
+      const alreadyWorkedTime = today().hoursDone;
+      const newMinutesWorked = justWorked + alreadyWorkedTime;
+      tempData.hours[thisWeek].days[dayNo].hoursDone = newMinutesWorked;
+      // tempData.hours[thisWeek].days[dayNo].hoursRemaining = today().hoursRemaining - newMinutesWorked;
     }
-    console.log(today().time);
-    console.log(type);
-    console.log(dayState.STARTED);
+
     if (type === dayState.STARTED) {
-
-      console.log(dayjs());
       tempData.hours[thisWeek].days[dayNo].time = now;
-      tempData.hours[thisWeek].days[dayNo].state = type;
-      localStorage.setItem('WFHHOURS', JSON.stringify(tempData));
-      setDaysData(tempData.hours[thisWeek]);
-    } else if (type === dayState.FINISHED) {
-      tempData.hours[thisWeek].days[dayNo].time = now;
-      tempData.hours[thisWeek].days[dayNo].state = type;
-      localStorage.setItem('WFHHOURS', JSON.stringify(tempData));
-      setDaysData(tempData.hours[thisWeek]);
+    } else {
+      tempData.hours[thisWeek].days[dayNo].time = 0;
     }
 
+    tempData.hours[thisWeek].days[dayNo].state = type;
+    localStorage.setItem('WFHHOURS', JSON.stringify(tempData));
+    setData(tempData);
+    setCurrentState(type);
   }
-
-  console.log(dayState.STARTED);
-  console.log(today().state);
-  console.log(today().state === dayState.STARTED);
 
 
   return (
     <Box p={1}>
       <Welcome name={data.name} />
-      {today().state === dayState.STARTED ? (
+      {data.hours[thisWeek] && 
+      <>
+      {currentState === dayState.STARTED || currentState === dayState.PAUSED ? (
         <ButtonGroup fullWidth>
           <Button
             variant='contained'
@@ -180,11 +105,11 @@ const Main = () => {
             variant='contained'
             color='secondary'
             size='large'
-            onClick={() => setDayPaused(!dayPaused)}
+            onClick={() => handleStateChange(currentState === dayState.PAUSED ? dayState.STARTED : dayState.PAUSED)}
           >
             <Box m={1.4}>
               <Typography variant='button' className={classes.buttonContent}>
-                {today().state === dayState.PAUSED ? 'Return to work' : 'have a break'}
+                {currentState === dayState.PAUSED ? 'Return to work' : 'Have a break'}
               </Typography>
             </Box>
           </Button>
@@ -199,20 +124,23 @@ const Main = () => {
         >
           <Box m={1.4}>
             <Typography variant='button' className={classes.buttonContent}>
-              {today().state === dayState.NOTSTARTED ? 'Start your day' : 'Restart work'}
+              {currentState === dayState.NOTSTARTED ? 'Start your day' : 'Restart work'}
             </Typography>
           </Box>
         </Button>
       )}
+      </>
+      }
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Typography variant='h6' gutterBottom>
-          Status: Working 3:25
+          Status: {today().time === 0 ? "Not Working " : "Working " }
+          <DailyMinutes minutesDone={today().hoursDone} time={today().time}/>
         </Typography>
         <Typography variant='h6' gutterBottom>
           Weekly Target: {data.weeklyHours}
         </Typography>
       </Box>
-      <Report details={data.hours[thisWeek].days} />
+      <Report details={data.hours[thisWeek].days} dayNo={dayNo} />
     </Box>
   );
 };

@@ -13,8 +13,6 @@ function App() {
   const theme = createTheme(palette);
 
   const hasData = localStorage.getItem('WFHHOURS');
-  console.log(hasData);
-  console.log(!!hasData);
 
   const [showMain, setMainSetup] = useState(!!hasData);
 
@@ -52,10 +50,6 @@ function App() {
 export default App;
 
 // TODO: User Standard cal/time picker
-// TODO: Show current Day progress
-// TODO: Table for week inputs
-// TODO: calculate week totals
-// TODO: use localstorage
 // TODO: add popup for localstorage cookie Law
 // TODO: About Page
 // TODO: About Page Content

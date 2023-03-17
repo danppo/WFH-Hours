@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 
-function Time(){
+const Time = () => {
 
   const getTime = () => dayjs().format('dddd D MMM YYYY, H:mm');
 
@@ -11,10 +11,9 @@ function Time(){
     setDateTime(getTime());
   }
 
-
   useEffect(() => {
     const timerId = setInterval(refreshClock, 15000);
-    return function cleanup() {
+    return () => {
       clearInterval(timerId);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
